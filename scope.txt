@@ -2,3 +2,4 @@
 ./src/protocol/curves/ProgressiveCurve.sol
 ./src/protocol/curves/OffsetProgressiveCurve.sol
 ./src/protocol/wallet/AtomWallet.sol
+./intuition-contracts-v2-periphery/contracts/TrustSwapAndBridgeRouter.sol

@@ -42,16 +42,22 @@ _Anything included in this section is considered a publicly known issue and is t
 - `AtomWallet` signature format is intentionally strict: only 65-byte raw ECDSA or 77-byte ECDSA+time-window suffix.
 - Router behavior is intentional: ERC20 flow refunds excess ETH sent with the transaction (`msg.value - bridgeFee`), while the ETH flow consumes `msg.value - bridgeFee` as swap input (no separate excess-refund path).
 
-✅ SCOUTS: Please format the response above 👆 so its not a wall of text and its readable.
-
 # Overview
 
-[ ⭐️ SPONSORS: add info here ]
+**Intuition is a decentralized protocol for building the world's first open, semantic, and token-curated knowledge graph.** It provides the infrastructure for verifiable attestations, portable identity, and trustful interactions at scale—creating a universal data layer that enables information to flow freely across applications, blockchains, and AI agents.
+
+## What is Intuition?
+While blockchains have historically decentralized money, **Intuition decentralizes information**—specifically its trust, ownership, discoverability, and monetization. By transforming unstructured, siloed data into structured, verifiable, and economically-backed attestations, Intuition creates a Semantic Web of Trust that makes knowledge programmable and interoperable.
+
+### Core Capabilities
+**Universal Identity:** Decentralized identifiers (DIDs) for people, concepts, organizations, and AI agents with portable, self-sovereign identity management
+**Verifiable Attestations:** Structured claims (subject-predicate-object triples) that are signed, attributable, and economically staked
+**Knowledge Graph:** A semantic layer where facts and opinions coexist with verifiable provenance and economic signals
+**Economic Incentives:** Bonding curves and cryptoeconomic mechanisms that align participants toward canonical standards and high-quality data
 
 ## Links
 
 - **Previous audits:**  https://github.com/0xIntuition/intuition-contracts-v2/tree/main/audits
-  - ✅ SCOUTS: If there are multiple report links, please format them in a list.
 - **Documentation:** https://www.docs.intuition.systems/
 - **Website:** https://www.intuition.systems/
 - **X/Twitter:** https://x.com/0xIntuition
@@ -60,119 +66,25 @@ _Anything included in this section is considered a publicly known issue and is t
 
 # Scope
 
-[ ✅ SCOUTS: add scoping and technical details here ]
-
 ### Files in scope
-- ✅ This should be completed using the `metrics.md` file
-- ✅ Last row of the table should be Total: SLOC
-- ✅ SCOUTS: Have the sponsor review and and confirm in text the details in the section titled "Scoping Q amp; A"
-
-*For sponsors that don't use the scoping tool: list all files in scope in the table below (along with hyperlinks) -- and feel free to add notes to emphasize areas of focus.*
-
-| Contract | SLOC | Purpose | Libraries used |  
-| ----------- | ----------- | ----------- | ----------- |
-| [contracts/folder/sample.sol](https://github.com/code-423n4/repo-name/blob/contracts/folder/sample.sol) | 123 | This contract does XYZ | [`@openzeppelin/*`](https://openzeppelin.com/contracts/) |
-
-### Files out of scope
-✅ SCOUTS: List files/directories out of scope
-
-# Additional context
-
-## Areas of concern (where to focus for bugs)
-- `TrustSwapAndBridgeRouter`: packed path parsing/pool validation, bridge fee handling, and external call sequencing (swap router + bridge hub).
-- `AtomWallet`: signature decoding/validation semantics (PR #135), owner/entrypoint authorization boundaries, and ownership claim transition logic.
-- `TrustBonding`: epoch boundary accounting, utilization-ratio math, and unclaimed-emissions accounting semantics (PR [#134](https://github.com/0xIntuition/intuition-contracts-v2/pull/134)).
-- `ProgressiveCurve` + `OffsetProgressiveCurve`: redeem/withdraw rounding correctness and edge-case behavior at low-share states (PR #136).
-
-✅ SCOUTS: Please format the response above 👆 so its not a wall of text and its readable.
-
-## Main invariants
-
-- Router path invariants: ETH path must start with WETH and all paths must end with TRUST; all hops must map to existing pools before swap.
-- Router fee/value invariants: swap/bridge reverts if bridge fee is insufficient; ERC20 flow refunds all ETH above required bridge fee.
-
-- AtomWallet auth invariant: only `owner()` or `EntryPoint` can execute wallet actions; deposit withdrawal is only by owner or self-call.
-- `AtomWallet` signature invariant: validation only accepts 65/77-byte signatures; time-window metadata is interpreted from signature suffix (PR [#135](https://github.com/0xIntuition/intuition-contracts-v2/pull/135) behavior).
-- `TrustBonding` claim-window invariant: only previous epoch is user-claimable; cannot double-claim an epoch.
-- `TrustBonding` unclaimed invariant: for epochs outside claim window, unclaimed amount is based on max epoch emissions minus claimed (PR [#134](https://github.com/0xIntuition/intuition-contracts-v2/pull/134) behavior).
-- Curve math invariant: redeem/convert-to-assets path uses consistent conservative rounding and must not revert in low-share edge cases where result should be zero (PR #136 behavior).
-- System config invariant: effective deployment assumptions include `minDeposit`/`minShare` floors mentioned above (no dust-state vault behavior below floor).
-
-✅ SCOUTS: Please format the response above 👆 so its not a wall of text and its readable.
-
-## All trusted roles in the protocol
-
-- `TrustSwapAndBridgeRouter`: contract `owner` (`Ownable2Step`) can set router/factory/quoter/bridge config
-- `TrustBonding`: `timelock` (parameter updates; min delay is 3 days), `DEFAULT_ADMIN_ROLE` (admin/unpause + inherited `VotingEscrow` admin actions), `PAUSER_ROLE` (can only pause the contract).
-- `AtomWallet`: wallet `owner` (initially `AtomWarden` via `MultiVault` until claimed, then user), and trusted `EntryPoint` contract for AA (account abstraction) execution path.
-- Curves (`ProgressiveCurve`, `OffsetProgressiveCurve`): no runtime privileged role in normal operation; only upgrade/initialization authority at proxy/governance layer, which is handled via timelock for all of our contracts (with a min delay of 7 days).
-
-✅ SCOUTS: Please format the response above 👆 using the template below👇
-
-| Role                                | Description                       |
-| --------------------------------------- | ---------------------------- |
-| Owner                          | Has superpowers                |
-| Administrator                             | Can change fees                       |
-
-✅ SCOUTS: Please format the response above 👆 so its not a wall of text and its readable.
-
-## Running tests
-
-- If Foundry is not already installed: `curl -L https://foundry.paradigm.xyz | bash && foundryup`
-- `git clone <repo> && cd <repo>`
-- Install dependencies: `forge install && bun install`
-- Build contracts: `forge build`
-- Run the tests: `forge test`
-    - Optional: Fork tests require Alchemy RPC config, so please make sure to set `API_KEY_ALCHEMY` in your local `.env` file (or skip fork tests when running locally without RPC).
-
-✅ SCOUTS: Please format the response above 👆 using the template below👇
-
-```bash
-git clone https://github.com/code-423n4/2023-08-arbitrum
-git submodule update --init --recursive
-cd governance
-foundryup
-make install
-make build
-make sc-election-test
-```
-To run code coverage
-```bash
-make coverage
-```
-
-✅ SCOUTS: Add a screenshot of your terminal showing the test coverage
-
-## Miscellaneous
-Employees of Intuition and employees' family members are ineligible to participate in this audit.
-
-Code4rena's rules cannot be overridden by the contents of this README. In case of doubt, please check with C4 staff.
-
-
-
-
-
-# Scope
 
 *See [scope.txt](https://github.com/code-423n4/2026-03-intuition/blob/main/scope.txt)*
 
-### Files in scope
-
-
-| File   | Logic Contracts | Interfaces | nSLOC | Purpose | Libraries used |
-| ------ | --------------- | ---------- | ----- | -----   | ------------ |
-| /src/protocol/emissions/TrustBonding.sol | 1| **** | 359 | |@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol<br>src/interfaces/ICoreEmissionsController.sol<br>src/interfaces/IMultiVault.sol<br>src/interfaces/ITrustBonding.sol<br>src/interfaces/ISatelliteEmissionsController.sol<br>src/external/curve/VotingEscrow.sol|
-| /src/protocol/curves/ProgressiveCurve.sol | 1| **** | 83 | |@prb/math/src/UD60x18.sol<br>src/protocol/curves/BaseCurve.sol<br>src/libraries/ProgressiveCurveMathLib.sol|
-| /src/protocol/curves/OffsetProgressiveCurve.sol | 1| **** | 86 | |@prb/math/src/UD60x18.sol<br>src/protocol/curves/BaseCurve.sol<br>src/libraries/ProgressiveCurveMathLib.sol|
-| /src/protocol/wallet/AtomWallet.sol | 1| **** | 158 | |@account-abstraction/core/BaseAccount.sol<br>@account-abstraction/interfaces/PackedUserOperation.sol<br>@openzeppelin/contracts/utils/cryptography/ECDSA.sol<br>@account-abstraction/interfaces/IEntryPoint.sol<br>@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol<br>@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol<br>@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol<br>src/interfaces/IMultiVault.sol<br>@account-abstraction/core/Helpers.sol|
-| **Totals** | **4** | **** | **686** | | |
+| File | nSLOC |
+| ---- | ----- |
+| /src/protocol/emissions/TrustBonding.sol | 359 |
+| /src/protocol/curves/ProgressiveCurve.sol | 83 |
+| /src/protocol/curves/OffsetProgressiveCurve.sol | 86 |
+| /src/protocol/wallet/AtomWallet.sol | 158 |
+| /intuition-contracts-v2-periphery/contracts/TrustSwapAndBridgeRouter.sol | 158 |
+| **Totals** | **844** |
 
 ### Files out of scope
 
 *See [out_of_scope.txt](https://github.com/code-423n4/2026-03-intuition/blob/main/out_of_scope.txt)*
 
-| File         |
-| ------------ |
+| File |
+| ---- |
 | ./script/SetupScript.s.sol |
 | ./script/base/BaseEmissionsControllerDeploy.s.sol |
 | ./script/base/BaseEmissionsControllerSetup.s.sol |
@@ -290,5 +202,111 @@ Code4rena's rules cannot be overridden by the contents of this README. In case o
 | ./tests/utils/Modifiers.sol |
 | ./tests/utils/Types.sol |
 | ./tests/utils/Utils.sol |
-| Totals: 117 |
+| ./intuition-contracts-v2-periphery/tests/utils/* |
+| ./intuition-contracts-v2-periphery/tests/mocks/* |
+| ./intuition-contracts-v2-periphery/tests/TrustSwapAndBridgeRouter/* |
+| ./intuition-contracts-v2-periphery/tests/EmissionsAutomationAdapter/* |
+| ./intuition-contracts-v2-periphery/tests/* |
+| ./intuition-contracts-v2-periphery/script/uniswap-v3-setup/* |
+| ./intuition-contracts-v2-periphery/script/system/* |
+| ./intuition-contracts-v2-periphery/script/* |
+| ./intuition-contracts-v2-periphery/contracts/interfaces/external/uniswapv3/* |
+| ./intuition-contracts-v2-periphery/contracts/interfaces/external/metalayer/* |
+| ./intuition-contracts-v2-periphery/contracts/interfaces/external/chainlink/* |
+| ./intuition-contracts-v2-periphery/contracts/interfaces/external/aerodrome/* |
+| ./intuition-contracts-v2-periphery/contracts/interfaces/external/* |
+| ./intuition-contracts-v2-periphery/contracts/interfaces/* |
+| ./intuition-contracts-v2-periphery/contracts/EmissionsAutomationAdapter.sol |
+| Totals: 132 |
+
+# Additional context
+
+## Areas of concern (where to focus for bugs)
+- `TrustSwapAndBridgeRouter`: packed path parsing/pool validation, bridge fee handling, and external call sequencing (swap router + bridge hub).
+- `AtomWallet`: signature decoding/validation semantics (PR #135), owner/entrypoint authorization boundaries, and ownership claim transition logic.
+- `TrustBonding`: epoch boundary accounting, utilization-ratio math, and unclaimed-emissions accounting semantics (PR [#134](https://github.com/0xIntuition/intuition-contracts-v2/pull/134)).
+- `ProgressiveCurve` + `OffsetProgressiveCurve`: redeem/withdraw rounding correctness and edge-case behavior at low-share states (PR #136).
+
+## Main invariants
+
+- Router path invariants: ETH path must start with WETH and all paths must end with TRUST; all hops must map to existing pools before swap.
+- Router fee/value invariants: swap/bridge reverts if bridge fee is insufficient; ERC20 flow refunds all ETH above required bridge fee.
+
+- AtomWallet auth invariant: only `owner()` or `EntryPoint` can execute wallet actions; deposit withdrawal is only by owner or self-call.
+- `AtomWallet` signature invariant: validation only accepts 65/77-byte signatures; time-window metadata is interpreted from signature suffix (PR [#135](https://github.com/0xIntuition/intuition-contracts-v2/pull/135) behavior).
+- `TrustBonding` claim-window invariant: only previous epoch is user-claimable; cannot double-claim an epoch.
+- `TrustBonding` unclaimed invariant: for epochs outside claim window, unclaimed amount is based on max epoch emissions minus claimed (PR [#134](https://github.com/0xIntuition/intuition-contracts-v2/pull/134) behavior).
+- Curve math invariant: redeem/convert-to-assets path uses consistent conservative rounding and must not revert in low-share edge cases where result should be zero (PR #136 behavior).
+- System config invariant: effective deployment assumptions include `minDeposit`/`minShare` floors mentioned above (no dust-state vault behavior below floor).
+
+## All trusted roles in the protocol
+
+| Role | Description |
+| ---- | ----------- |
+| `TrustSwapAndBridgeRouter` — `owner` (`Ownable2Step`) | Can set router, factory, quoter, and bridge configuration. |
+| `TrustBonding` — `timelock` | Controls parameter updates; minimum delay of 3 days. |
+| `TrustBonding` — `DEFAULT_ADMIN_ROLE` | Admin and unpause rights; also inherits `VotingEscrow` admin actions. |
+| `TrustBonding` — `PAUSER_ROLE` | Can only pause the contract. |
+| `AtomWallet` — `owner` | Initially `AtomWarden` (via `MultiVault`) until claimed by the user, who then assumes full wallet ownership. |
+| `AtomWallet` — `EntryPoint` | Trusted ERC-4337 entry point contract; sole authorized caller for the account abstraction execution path. |
+| `ProgressiveCurve` / `OffsetProgressiveCurve` — upgrade/init authority | No runtime privileged role in normal operation. Upgrade and initialization authority is managed at the proxy/governance layer via timelock (minimum delay of 7 days). |
+
+## Running tests
+
+- If Foundry is not already installed: `curl -L https://foundry.paradigm.xyz | bash && foundryup`
+- If Bun is not already installed, see: https://bun.com/docs/installation
+- Optional: Fork tests require Alchemy RPC config, so please make sure to set `API_KEY_ALCHEMY` in your local `.env` file (or skip fork tests when running locally without RPC).
+
+```bash
+git clone --recurse https://github.com/code-423n4/2026-03-intuition.git
+cd code-423n4/2026-03-intuition
+forge install && bun install
+forge build
+forge test
+cd intuition-contracts-v2-periphery
+forge install && bun install
+forge build
+forge test
+```
+
+## Creating a PoC
+
+High- and Medium-risk submissions require a [coded, runnable Proof of Concept](https://docs.code4rena.com/competitions/submission-guidelines#required-proof-of-concept-poc-for-solidity-evm-audits). This repo provides `BaseTest` contract and two PoC templates under `tests/` so wardens can build PoCs against the same setup as the existing test suite.
+
+### Core in-scope contracts (TrustBonding, ProgressiveCurve, OffsetProgressiveCurve, AtomWallet)
+
+- **BaseTest:** [tests/BaseTest.t.sol](tests/BaseTest.t.sol) — deploys the protocol (Trust, WrappedTrust, MultiVault, TrustBonding, curves, AtomWallet factory, etc.) and exposes `protocol.*` and `users.*` (admin, alice, bob, charlie, timelock, controller).
+- **PoC template:** [tests/PoCCore.t.sol](tests/PoCCore.t.sol)
+
+Use `protocol.*` and `users.*` and add modifiers from BaseTest/Modifiers (e.g. `onlyAdmin`, `onlyUser`) as needed.
+
+### Periphery in-scope contract (TrustSwapAndBridgeRouter)
+
+- **Same BaseTest** as above (core protocol is available).
+- **PoC template:** [tests/PoCPeriphery.t.sol](tests/PoCPeriphery.t.sol) — extends BaseTest and deploys `TrustSwapAndBridgeRouter`; implement your PoC in `test_submissionValidity()` (e.g. path validation, bridge fee handling, swapAndBridgeWithETH / swapAndBridgeWithERC20 / bridgeTrust).
+
+### Running the PoC tests
+
+From the **repo root** (no need to `cd` into periphery):
+
+```bash
+# Core PoC only
+forge test --match-contract PoCCore --match-test submissionValidity
+
+# Periphery PoC only
+forge test --match-contract PoCPeriphery --match-test submissionValidity
+
+# Both PoCs
+forge test --match-test submissionValidity
+```
+
+The test **must execute successfully** for your submission to be considered valid.
+
+## Miscellaneous
+Employees of Intuition and employees' family members are ineligible to participate in this audit.
+
+Code4rena's rules cannot be overridden by the contents of this README. In case of doubt, please check with C4 staff.
+
+
+
 
