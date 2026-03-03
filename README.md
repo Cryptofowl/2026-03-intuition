@@ -70,6 +70,7 @@ While blockchains have historically decentralized money, **Intuition decentraliz
 
 *See [scope.txt](https://github.com/code-423n4/2026-03-intuition/blob/main/scope.txt)*
 
+*Note: The nSLoC counts in the following table have been automatically generated and may differ depending on the definition of what a "significant" line of code represents. As such, they should be considered indicative rather than absolute representations of the lines involved in each contract.*
 | File | nSLOC |
 | ---- | ----- |
 | /src/protocol/emissions/TrustBonding.sol | 359 |
